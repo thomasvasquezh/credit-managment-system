@@ -1,0 +1,194 @@
+openapi: 3.0.3
+
+info:
+  title: MS Auth API
+  description: API de autenticación para el sistema de gestión de créditos.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8081/api/v1
+    description: Local environment
+
+tags:
+  - name: Auth
+    description: Operaciones de autenticación
+
+paths:
+  /auth/register:
+    post:
+      tags:
+        - Auth
+      summary: Registrar usuario
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterUserRequest'
+            example:
+              firstName: Juan
+              lastName: Perez
+              email: juan.perez@email.com
+              password: Password123*
+              role: CLIENT
+      responses:
+        '201':
+          description: Usuario registrado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Error de validación
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '409':
+          description: El email ya existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Iniciar sesión
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            example:
+              email: juan.perez@email.com
+              password: Password123*
+      responses:
+        '200':
+          description: Login exitoso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Error de validación
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '401':
+          description: Credenciales inválidas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+
+components:
+  schemas:
+    RegisterUserRequest:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - email
+        - password
+        - role
+      properties:
+        firstName:
+          type: string
+          minLength: 2
+          maxLength: 80
+          example: Juan
+        lastName:
+          type: string
+          minLength: 2
+          maxLength: 80
+          example: Perez
+        email:
+          type: string
+          format: email
+          example: juan.perez@email.com
+        password:
+          type: string
+          format: password
+          minLength: 8
+          example: Password123*
+        role:
+          $ref: '#/components/schemas/UserRole'
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: juan.perez@email.com
+        password:
+          type: string
+          format: password
+          example: Password123*
+
+    AuthResponse:
+      type: object
+      properties:
+        userId:
+          type: integer
+          format: int64
+          example: 1
+        fullName:
+          type: string
+          example: Juan Perez
+        email:
+          type: string
+          example: juan.perez@email.com
+        role:
+          $ref: '#/components/schemas/UserRole'
+        tokenType:
+          type: string
+          example: Bearer
+        accessToken:
+          type: string
+          example: eyJhbGciOiJIUzI1NiJ9...
+        expiresIn:
+          type: integer
+          format: int64
+          example: 3600
+
+    UserRole:
+      type: string
+      enum:
+        - ADMIN
+        - ADVISOR
+        - CLIENT
+      example: CLIENT
+
+    ApiErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Invalid request
+        status:
+          type: integer
+          example: 400
+        path:
+          type: string
+          example: /api/v1/auth/register
+        timestamp:
+          type: string
+          format: date-time
+          example: 2026-04-29T16:30:00Z
+        errors:
+          type: array
+          items:
+            type: string
+          example:
+            - email must be a valid email
+            - password must have at least 8 characters
