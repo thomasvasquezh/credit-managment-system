@@ -21,7 +21,10 @@ public class SecurityConfig {
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**",
                                 "/openapi/**",
-                                "/actuator/health"
+                                "/actuator/health",
+                                "/api/v1/auth/register",
+                                "/api/v1/auth/login",
+                                "/error"
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/openapi/**").permitAll()
                         .anyRequest().authenticated()
