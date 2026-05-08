@@ -1,9 +1,5 @@
 package com.thomas.ms_auth.domain;
-
-
-
 import lombok.*;
-
 import java.time.LocalDateTime;
 
 @Getter
@@ -25,5 +21,26 @@ public class User {
         String first = firstName == null ? "" : firstName.trim();
         String last = lastName == null ? "" : lastName.trim();
         return (first + " " + last).trim();
+    }
+
+    public static User create(
+            String firstName,
+            String lastName,
+            String email,
+            String encodedPassword,
+            UserRole role,
+            UserStatus status,
+            LocalDateTime createdAt
+    ){
+        return new User(
+                null,
+                firstName,
+                lastName,
+                email,
+                encodedPassword,
+                role,
+                status,
+                createdAt
+        );
     }
 }

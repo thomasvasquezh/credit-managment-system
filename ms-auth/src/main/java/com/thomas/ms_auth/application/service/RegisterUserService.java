@@ -27,8 +27,7 @@ public class RegisterUserService implements RegisterUserUseCase {
             throw new IllegalArgumentException("Email already registered");
         }
 
-        User user = new User(
-                null,
+        User user = User.create(
                 command.firstName(),
                 command.lastName(),
                 normalizedEmail,
