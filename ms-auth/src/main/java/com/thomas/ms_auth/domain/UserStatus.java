@@ -1,4 +1,6 @@
 package com.thomas.ms_auth.domain;
 
-public class UserStatus {
+public enum UserStatus {
+    ACTIVE,
+    INACTIVE
 }

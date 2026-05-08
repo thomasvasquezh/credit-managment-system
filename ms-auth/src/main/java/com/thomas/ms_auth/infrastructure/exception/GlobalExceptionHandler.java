@@ -33,4 +33,21 @@ public class GlobalExceptionHandler {
                 errors
         );
     }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.CONFLICT) // 409 si es "email ya registrado"
+    public ApiErrorResponse handleIllegalArgument(
+            IllegalArgumentException exception,
+            HttpServletRequest request
+    ) {
+        return new ApiErrorResponse(
+                exception.getMessage(),
+                HttpStatus.CONFLICT.value(),
+                request.getRequestURI(),
+                LocalDateTime.now(),
+                List.of()
+        );
+    }
+
+
 }
