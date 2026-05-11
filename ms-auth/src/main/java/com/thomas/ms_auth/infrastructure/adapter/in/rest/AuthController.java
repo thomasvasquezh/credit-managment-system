@@ -1,9 +1,11 @@
 package com.thomas.ms_auth.infrastructure.adapter.in.rest;
 
+import com.thomas.ms_auth.application.command.LoginCommand;
 import com.thomas.ms_auth.application.command.RegisterUserCommand;
+import com.thomas.ms_auth.application.port.in.LoginUseCase;
 import com.thomas.ms_auth.application.port.in.RegisterUserUseCase;
+import com.thomas.ms_auth.application.result.AuthResult;
 import com.thomas.ms_auth.application.result.RegisterUserResult;
-import com.thomas.ms_auth.domain.UserRole;
 import com.thomas.ms_auth.infrastructure.adapter.in.rest.dto.AuthResponse;
 import com.thomas.ms_auth.infrastructure.adapter.in.rest.dto.LoginRequest;
 import com.thomas.ms_auth.infrastructure.adapter.in.rest.dto.RegisterUserRequest;
@@ -11,6 +13,7 @@ import com.thomas.ms_auth.infrastructure.adapter.in.rest.dto.RegisterUserRespons
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthController {
     private final RegisterUserUseCase registerUserUseCase;
+    private final LoginUseCase loginUseCase;
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
@@ -37,21 +41,31 @@ public class AuthController {
                     result.role(),
                     result.status()
         );
-
-
     }
 
     @PostMapping("/login")
     public AuthResponse login(@Valid @RequestBody LoginRequest request) {
-        return new AuthResponse(
-                1L,
-                "Mock User",
+
+        AuthResult result = loginUseCase.login(
+                new LoginCommand(
                 request.email(),
-                UserRole.CLIENT,
-                "Bearer",
-                "mock-access-token",
-                3600L
+                request.password()
+            ));
+        return new AuthResponse(
+                result.userId(),
+                result.fullName(),
+                result.email(),
+                result.role(),
+                result.tokenType(),
+                result.accessToken(),
+                result.expiresIn()
         );
-    }   
+    }
+
+    //proff
+    @GetMapping("/me")
+    public String me(Authentication authentication) {
+        return "Authenticated user: " + authentication.getName();
+    }
 
 }

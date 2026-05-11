@@ -43,4 +43,8 @@ public class User {
                 createdAt
         );
     }
+
+    public boolean isActive() {
+        return status == UserStatus.ACTIVE;
+    }
 }
