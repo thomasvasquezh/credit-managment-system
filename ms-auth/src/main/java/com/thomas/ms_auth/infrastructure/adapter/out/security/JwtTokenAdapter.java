@@ -18,9 +18,9 @@ public class JwtTokenAdapter implements TokenGeneratorPort {
     private final long expirationSeconds;
 
     public JwtTokenAdapter(
-            @Value("${spring.jwt.secret}") String secret,
-            @Value("${spring.jwt.issuer}") String issuer,
-            @Value("${spring.jwt.expiration-seconds}") long expirationSeconds
+            @Value("${security.jwt.secret}") String secret,
+            @Value("${security.jwt.issuer}") String issuer,
+            @Value("${security.jwt.expiration-seconds}") long expirationSeconds
     ) {
         this.secret = secret;
         this.issuer = issuer;
@@ -36,7 +36,7 @@ public class JwtTokenAdapter implements TokenGeneratorPort {
                 .subject(user.getEmail())
                 .claim("role", user.getRole().name())
                 .issuedAt(Date.from(now))
-                .expiration(Date.from(now.plusSeconds(expirationSeconds)))
+                .expiration(Date.from(expiration))
                 .signWith(getSigningKey())
                 .compact();
     }
