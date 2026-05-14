@@ -4,10 +4,10 @@ services:
     container_name: mysql-ms-auth
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
       MYSQL_DATABASE: ms_auth_db
-      MYSQL_USER: auth_user
-      MYSQL_PASSWORD: auth_pass
+      MYSQL_USER: ${MYSQL_USER:-auth_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-auth_pass}
     ports:
       - "3307:3306"
     volumes:

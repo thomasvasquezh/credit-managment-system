@@ -1,0 +1,35 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: ms-auth
+  datasource:
+    url: jdbc:mysql://localhost:3307/ms_auth_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USER:auth_user}
+    password: ${MYSQL_PASSWORD:auth_pass}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+security:
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration-seconds: ${JWT_EXPIRATION_SECONDS:900}
+    issuer: ${JWT_ISSUER:ms-auth}
+
+springdoc:
+  swagger-ui:
+    url: /openapi/ms-auth-api.yml
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
