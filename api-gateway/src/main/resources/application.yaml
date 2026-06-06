@@ -1,0 +1,97 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: api-gateway
+
+  # intenta leer configuración desde config server
+  config:
+    import: optional:configserver:http://config-server:8888
+
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true                 # resuelve lb://ms-auth, lb://ms-solicitudes(cuando este)
+          lower-case-service-id: true   # fuerza nombres en minúscula
+      routes:
+        # ms auth
+        - id: ms-auth-login
+          uri: lb://ms-auth
+          predicates:
+            - Path=/api/v1/auth/**
+          filters:
+            - StripPrefix=0             # no recorta prefijo
+            # JWT no necesario aqui, rutas públicas
+
+        # mcsv solicitudes(cuando este)
+        - id: ms-solicitudes
+          uri: lb://ms-solicitudes
+          predicates:
+            - Path=/api/v1/solicitudes/**
+          filters:
+            - StripPrefix=0
+            - name: CircuitBreaker       # resiliencia para microservicio
+              args:
+                name: solicitudesCircuitBreaker
+                fallbackUri: forward:/fallback/solicitudes
+
+        # mcsv notificaciones(cuando este)
+        - id: ms-notificaciones
+          uri: lb://ms-notificaciones
+          predicates:
+            - Path=/api/v1/notificaciones/**
+          filters:
+            - StripPrefix=0
+            # JWT global se aplica antes
+
+      # CORS global para frontend dev por crear
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowed-origins:
+              - "http://localhost:3000"
+            allowed-methods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowed-headers: "*"
+            allow-credentials: true
+            max-age: 3600
+
+# eureka
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+# JWT configuración mínima local – sobrescribible en Config Server
+jwt:
+  secret: ${JWT_SECRET:dev-secret-32-chars-min}      # fallback local dev
+  expiration-seconds: ${JWT_EXPIRATION_SECONDS:900}  # 15 minutos
+  issuer: ${JWT_ISSUER:ms-auth}
+
+# actuator – para el monitoreo
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, gateway
+  endpoint:
+    gateway:
+      enabled: true   # expone /actuator/gateway/routes
+
+# Resilience4j – Circuit Breaker
+resilience4j:
+  circuitbreaker:
+    instances:
+      solicitudesCircuitBreaker:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 3
