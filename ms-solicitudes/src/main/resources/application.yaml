@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: ms-solicitudes
+  r2dbc:
+    url: ${R2DBC_URL:r2dbc:h2:mem:///ms_solicitudes_db;DB_CLOSE_DELAY=-1}
+    username: ${R2DBC_USERNAME:sa}
+    password: ${R2DBC_PASSWORD:}
+
+server:
+  port: ${SERVER_PORT:8082}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
